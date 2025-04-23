@@ -1,0 +1,40 @@
+<%- include('partials/header.ejs'); -%>
+
+<div id="addBookForm" class="container mw-md-custom-thirty" >
+    <form action="/compose" method="POST">
+      <div class="form-group">
+        <label for="postTitle">Book Title</label>
+        <input type="text" class="form-control" name="bookTitle" placeholder="Enter Title" autofocus required>
+      </div>
+  
+      <div class="form-group mt-3">
+        <label for="postContent">Description</label>
+        <textarea class="form-control" name="bookDescription" rows="4" autofocus required></textarea>
+      </div>
+  
+      <button type="submit" class="btn btn-outline-light hotpink mt-3">Add Book</button>
+    </form>
+</div>
+
+<% if (locals.bookListArray) { %>
+    <% for(let i = 0; i < bookListArray.length; i++) {%>
+        <div class="container my-5">
+            <div class="p-5 text-center bg-body-tertiary rounded-3">
+              <img src="<%= bookListArray[i].image %>" alt="Book Cover" style="width: 200px">              
+              <h1 class="text-body-emphasis mt-3"><%= bookListArray[i].title %> </h1>
+              <p class="col-lg-8 mx-auto fs-5 text-muted">
+                <%= bookListArray[i].description %> 
+              </p>
+              <div class="d-inline-flex gap-2 mb-3 mt-3">
+                <a href="/edit/<%= bookListArray[i].id %>" class="btn btn-primary">Edit</a>
+                <form action="/delete/<%= bookListArray[i].id %>" method="POST" class="d-inline">
+                  <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this post?');">Delete</button>
+                </form>
+              </div>
+            </div>
+        </div>
+    <% } %>
+<% } %>
+<script src="/index.js"></script>
+
+<%- include('partials/footer.ejs'); -%>

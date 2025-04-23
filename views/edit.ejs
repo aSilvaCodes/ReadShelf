@@ -1,0 +1,18 @@
+<%- include("partials/header.ejs") %>
+
+<div class="container mw-md-custom-thirty" >
+    <form action="/edit/<%= book.id %>" method="POST">
+      <div class="form-group">
+        <label for="postTile">Title</label>
+        <input type="text" class="form-control" name="bookTitle" value="<%=book.title%>" autofocus required>
+      </div>
+      <div class="form-group mt-3">
+        <label for="postContent">Post</label>
+        <textarea class="form-control" name="bookDescription" rows="4" autofocus required><%=book.description%></textarea>
+      </div>
+      <button type="submit" class="btn btn-outline-light hotpink mt-3">Save Changes</button>
+      <a href="/" class="btn btn-secondary mt-3">Cancel</a>
+    </form>
+  </div>
+
+<%- include("partials/footer.ejs") %>
