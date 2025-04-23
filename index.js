@@ -19,29 +19,44 @@ db.connect();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-const bookList = [];
+let bookList = [];
 var idCount = 0;
 
+app.get("/about", (req, res) => {
+  res.render("about.ejs")
+}); 
+
+app.get("/contact", (req, res) => {
+  res.render("contact.ejs")
+}); 
+
 app.get("/", async (req, res) => {
+  try{
+    const result = await db.query("SELECT * FROM books");
+    bookList = result.rows;
+  } catch(err){
+    console.log(err);
+  }
   res.render("index.ejs", { bookListArray: bookList });
 });
 
-app.post("/compose", async (req, res) =>{
+app.post("/add", async (req, res) =>{
   const newBook = {
     id: ++idCount,
     title: req.body.bookTitle,
     image: await getBookCover(req.body.bookTitle),
     description: req.body.bookDescription
   };
-  bookList.push(newBook);
+  try{
+    await db.query("INSERT INTO books (title, image, description) VALUES ($1, $2, $3)", [newBook.title, newBook.image, newBook.description]);
+    res.redirect("/");
+  } catch(err){
+    console.log(err)
+  }
   console.log(bookList);
   res.render("index.ejs", {
-    title: newBook.title,
-    image: newBook.image,
-    description: req.body.bookDescription,
     bookListArray: bookList
   });
-  //res.redirect("/");
 });
 
 app.get("/edit/:id" , (req, res) => {
@@ -53,24 +68,34 @@ app.get("/edit/:id" , (req, res) => {
   res.render("edit.ejs", { book: book });
 });
 
-app.post("/edit/:id", (req, res) => {
+app.post("/edit/:id", async (req, res) => {
   const bookId = parseInt(req.params.id);
   const bookIndex = bookList.findIndex(b => b.id === bookId);
   if (bookIndex === -1) {
       return res.status(404).send('Book not found');  
   }
-  bookList[bookIndex].title = req.body.bookTitle;
-  bookList[bookIndex].description = req.body.bookDescription;
-  res.redirect('/');
+  const newTitle = req.body.bookTitle;
+  const newDescription = req.body.bookDescription;
+  try{
+    await db.query("UPDATE books SET title = $1, description = $2 WHERE id = $3", [newTitle, newDescription, bookId]);
+    res.redirect("/");
+  } catch(err){
+    console.log(err);
+  }
 });
 
-app.post("/delete/:id", (req, res) => {
+app.post("/delete/:id", async (req, res) => {
   const bookId = parseInt(req.params.id);
   const bookIndex = bookList.findIndex(b => b.id === bookId);
-  if(bookIndex !== -1){
-      bookList.splice(bookIndex, 1);
+  if(bookIndex === -1){
+    return res.status(404).send('Book not found');  
   }
-  res.redirect("/");
+  try{
+    await db.query("DELETE FROM books WHERE id = $1", [bookId]);
+    res.redirect("/");
+  }catch(err){
+    console.log(err);
+  }
 });
 
 async function getBookCover(title){
