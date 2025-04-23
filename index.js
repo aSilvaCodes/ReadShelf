@@ -20,7 +20,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 let bookList = [];
-var idCount = 0;
 
 app.get("/about", (req, res) => {
   res.render("about.ejs")
@@ -42,7 +41,6 @@ app.get("/", async (req, res) => {
 
 app.post("/add", async (req, res) =>{
   const newBook = {
-    id: ++idCount,
     title: req.body.bookTitle,
     image: await getBookCover(req.body.bookTitle),
     description: req.body.bookDescription
@@ -53,10 +51,6 @@ app.post("/add", async (req, res) =>{
   } catch(err){
     console.log(err)
   }
-  console.log(bookList);
-  res.render("index.ejs", {
-    bookListArray: bookList
-  });
 });
 
 app.get("/edit/:id" , (req, res) => {
